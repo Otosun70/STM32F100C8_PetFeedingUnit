@@ -1,0 +1,16 @@
+OLED.c:13:13:OLED_WriteCommand	32	static
+OLED.c:22:9:OLED_Init	8	static
+OLED.c:75:6:OLED_Fill	16	static
+OLED.c:80:6:OLED_ToggleInvert	16	static
+OLED.c:93:6:OLED_DrawLine	40	static
+OLED.c:177:6:OLED_DrawRectangle	32	static
+OLED.c:202:6:OLED_DrawFilledRectangle	40	static
+OLED.c:229:6:OLED_DrawTriangle	32	static
+OLED.c:237:6:OLED_DrawFilledTriangle	64	static
+OLED.c:293:6:OLED_DrawCircle	40	static
+OLED.c:327:6:OLED_DrawFilledCircle	48	static
+OLED.c:364:6:OLED_UpdateScreen	32	static
+OLED.c:384:6:OLED_DrawPixel	16	static
+OLED.c:413:6:OLED_WriteChar	48	static
+OLED.c:452:6:OLED_WriteString	24	static
+OLED.c:475:6:OLED_SetCursor	16	static
