@@ -9,19 +9,19 @@
 extern DMA_HandleTypeDef hdm1_adc1;
 extern ADC_HandleTypeDef hadc1;
 
-extern uint16_t deger[4];
-extern int potDeger2, tempDeger, batDeger;
+extern uint16_t deger[5];
+extern int potDeger;
 
 char keyYer[14];
 
 void ADC_DMA_degerOkuma() {
-	HAL_ADC_Start_DMA(&hadc1, deger, 4);
+	HAL_ADC_Start_DMA(&hadc1, deger, 5);
 	HAL_ADC_ConvHalfCpltCallback(&hadc1);
 	HAL_ADC_Stop_DMA(&hadc1);
 }
 
 void pilGoster() {
-	int pilDeger = (deger[0] / 4 - 3);
+	int pilDeger = (deger[0]>>6);
 
 	OLED_SetCursor(111, 0);
 	OLED_WriteChar((pilDeger), Font_16x6, White);

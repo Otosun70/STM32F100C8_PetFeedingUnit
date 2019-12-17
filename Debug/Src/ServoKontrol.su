@@ -1,1 +1,2 @@
 ServoKontrol.c:3:6:servoKontrol	8	static
+ServoKontrol.c:43:6:KeyServoKontrol	4	static

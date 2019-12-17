@@ -19,9 +19,9 @@ void ButtonPed_Init(void)
 
 }
 
-void button_Read(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin1, uint16_t GPIO_Pin2, uint16_t GPIO_Pin3, uint16_t GPIO_Pin4)
+void button_Read(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin1, uint16_t GPIO_Pin2, uint16_t GPIO_Pin3, uint16_t GPIO_Pin4,uint16_t GPIO_Pin5)
 {
-  Key=(GPIOx->IDR & (GPIO_Pin1|GPIO_Pin2|GPIO_Pin3|GPIO_Pin4));
+  Key=(GPIOx->IDR & (GPIO_Pin1|GPIO_Pin2|GPIO_Pin3|GPIO_Pin4|GPIO_Pin5));
 
   if(Key==T0DEGER)
   {

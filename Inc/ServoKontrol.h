@@ -12,4 +12,6 @@
 
 void servoKontrol();
 
+void KeyServoKontrol();
+
 #endif /* SERVOKONTROL_H_ */

@@ -11,30 +11,35 @@ void saatAyarla()
 	extern RTC_HandleTypeDef hrtc;
 	RTC_TimeTypeDef sTime;
 //	sTime.TimeFormat=RTC_HOURFORMAT12_AM;
-	sTime.Hours=SaatAry[0];
-	sTime.Minutes=SaatAry[1];
-	sTime.Seconds=SaatAry[2];
+	sTime.Hours		=SaatAry[0];
+	sTime.Minutes	=SaatAry[1];
+	sTime.Seconds	=SaatAry[2];
+//	sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+//	sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+
 	if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK) {
 		Error_Handler();
 	}
+//	hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+//	RTC->CR &= ~(1<<6);
+
+
 }
 
 void alarmAyarla()
 {
 	extern RTC_HandleTypeDef hrtc;
 	RTC_AlarmTypeDef sAlarm;
-//	sAlarm.AlarmTime.TimeFormat=RTC_HOURFORMAT12_AM;
+
 	sAlarm.AlarmTime.Hours=SaatAry[0];
 	sAlarm.AlarmTime.Minutes=SaatAry[1];
 	sAlarm.AlarmTime.Seconds=SaatAry[2];
-//	sAlarm.AlarmTime.SubSeconds = 0;
-//	sAlarm.AlarmTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-//	sAlarm.AlarmTime.StoreOperation = RTC_STOREOPERATION_RESET;
-//	sAlarm.AlarmMask = RTC_ALARMMASK_DATEWEEKDAY;
-//	sAlarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_NONE;
-//	sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
-//	sAlarm.AlarmDateWeekDay = 5;
+
 	sAlarm.Alarm = RTC_ALARM_A;
+
+	  BKP->DR6=(SaatAry[0]<<8)|(SaatAry[1]);
+	  BKP->DR7=(SaatAry[2]<<8);
+
 
 	if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BIN) != HAL_OK)
 	  {
@@ -45,17 +50,21 @@ void alarmAyarla()
 void takvimAyarla()
 {
 	extern RTC_HandleTypeDef hrtc;
-	RTC_DateTypeDef sDate ;
+	  RTC_DateTypeDef DateToUpdate = {0};
 
-	sDate.Date =takvimAry[0];
-	sDate.Month =takvimAry[1];
-	sDate.Year =takvimAry[2];
-	sDate.WeekDay = takvimAry[3];
+	  DateToUpdate.Date = takvimAry[0];
+	  DateToUpdate.Month = takvimAry[1];
+	  DateToUpdate.Year = takvimAry[2];
+	  DateToUpdate.WeekDay = takvimAry[3];
 
-	if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
-	{
-		Error_Handler();
-	}
+	  BKP->DR4=(takvimAry[0]<<8)|(takvimAry[1]);
+	  BKP->DR5=(takvimAry[2]<<8)|(takvimAry[3]);
+
+	  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BIN) != HAL_OK)
+	  {
+	    Error_Handler();
+	  }
+
 }
 
 void saatiAyarlama(uint8_t y)
@@ -171,9 +180,10 @@ void alarmAyarlama(uint8_t y) {
 
 void takvimiAyarlama(uint8_t y)
 {
+
 	char takvimYer[12];
- 	char* weekDay[] = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-			"Saturday", "Sunday"};
+
+//	char* weekDay[] = { "Pzt", "Sal", "Car", "Per", "Cum","Cmt", "Paz"};
 
 		if (durum) {
 
@@ -191,7 +201,7 @@ void takvimiAyarlama(uint8_t y)
 				}
 				else	takvimAryNo ++;
 
-				if(takvimAryNo ==4)
+				if(takvimAryNo ==3)
 				{
 					kayitOnayDurum=true;
 				}
@@ -210,7 +220,7 @@ void takvimiAyarlama(uint8_t y)
 
 				if(takvimAryNo < 0)
 				{
-					takvimAryNo=3;
+					takvimAryNo=2;
 				}
 
 				break;
@@ -280,10 +290,9 @@ void takvimiAyarlama(uint8_t y)
 					}
 				}
 				break;
-				break;
 
 			default:
-				;
+				break;
 			}
 		}
 		if(kayitOnayDurum)
@@ -295,7 +304,7 @@ void takvimiAyarlama(uint8_t y)
 		OLED_SetCursor(0, y);
 		OLED_WriteString(takvimYer, Font_11x18, White);
 		OLED_SetCursor(30, y+20);
-		OLED_WriteString(weekDay[takvimAry[3]-1], Font_7x10, White);  //
+//		OLED_WriteString(weekDay[takvimAry[3]], Font_7x10, White);  //
 		if(durumFlash)
 		{
 			if(takvimAryNo<2)
@@ -352,6 +361,7 @@ void KeyAlarmAyarlama()
 
 void KeyTakvimiAyarlama()
 {
+
 	extern RTC_HandleTypeDef hrtc;
 	RTC_DateTypeDef sDateGet;
 	HAL_RTC_GetDate(&hrtc, &sDateGet, RTC_FORMAT_BIN);
@@ -366,89 +376,7 @@ void KeyTakvimiAyarlama()
 	displayClean=true;
 }
 
-void KeyServoKontrol()
-{
-	displaySelectKey=SERVO_KONTROL;
-	displayClean=true;
-}
-/*Ekranda gösterilecek unsurları Key1 değerine göre seçer */
-void displaySelect()
-{
 
-	button_Read(GPIOB,KEY_1_Pin,KEY_2_Pin,KEY_3_Pin,KEY_4_Pin); /*Menu ekranına geçirecek kısayol tuş kombinasyonunu algılayıp Key1 değerine aktarır*/
-	if(Key==MENU_SISTEMI)
-	{
-		displaySelectKey=Key;
-		displayClean=true;
-	}
-	switch(displaySelectKey)
-	{
-	case MENU_SISTEMI :
-		if(displayClean)
-		{
-		displayClean=false;
-		OLED_Fill(Black);
-		}
-//		alarmDurdur();
-		menuSistemi(6);
-		break;
-
-	case SAATI_AYARLAMA:
-		if(displayClean)
-		{
-		displayClean=false;
-		OLED_Fill(Black);
-		}
-		saatiAyarlama(30);
-		break;
-	case TAKVIMI_AYARLAMA:
-		if(displayClean)
-		{
-		displayClean=false;
-		OLED_Fill(Black);
-		}
-		takvimiAyarlama(20);
-		break;
-	case ALARM_AYARLAMA:
-		if(displayClean)
-		{
-		displayClean=false;
-		OLED_Fill(Black);
-		}
-		alarmAyarlama(20);
-		break;
-
-	case GIRIS_EKRANI:
-		if(displayClean)
-		{
-		displayClean=false;
-		OLED_Fill(Black);
-		}
-		alarmGoster();
-		takvimGoster();
-	//	ADC_degerleriGosterme();
-		break;
-
-	case SERVO_KONTROL:
-		if(displayClean)
-		{
-		displayClean=false;
-		OLED_Fill(Black);
-		}
-		servoKontrol();
-//		takvimGoster();
-
-		break;
-
-	}
-}
-
-void menuExit()
-{
-	displaySelectKey=MENUEXIT;
-	currentM = &menu1M;
-	displayClean=true;
-}
 
 void kayitSorma(uint8_t x1,uint8_t y1)
 {
@@ -466,12 +394,12 @@ void kayitSorma(uint8_t x1,uint8_t y1)
 
 bool alarmRead(void)
 {
-return ((RTC->CRL & RTC_CRL_ALRF_Msk)>> RTC_CRL_ALRF_Pos);//RTC_CRL_ALRF_Pos
+	return ((RTC->CRL & RTC_CRL_ALRF_Msk)>> RTC_CRL_ALRF_Pos);//RTC_CRL_ALRF_Pos
 }
 
 void alarmDurdur()
 {
-	RTC->CRL &=~RTC_CRL_ALRF;
+	RTC->CRL &=~RTC_CRL_ALRF;;
 }
 
 void alarmDeneme(uint8_t alarmDurdurmaKeyDegeri)
@@ -483,11 +411,16 @@ void alarmDeneme(uint8_t alarmDurdurmaKeyDegeri)
 
 	if(alarmRead())
 	{
-//		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,SET);
+		HAL_GPIO_WritePin(LED_ALARM_GPIO_Port, LED_ALARM_Pin,SET);
+		if(!displayDurum)
+		{
+			displayDurum=true;
+			OLED_Init();
+		}
 	}
 	else
 	{
-//		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,RESET);
+		HAL_GPIO_WritePin(LED_ALARM_GPIO_Port, LED_ALARM_Pin,RESET);
 	}
 }
 
@@ -536,24 +469,42 @@ void takvimGoster()
 	RTC_DateTypeDef sDateGet;
 
 //	  const char* weekD[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "??"};
-	char* weekDay[] = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-			"Saturday", "Sunday"};
+	char* weekDay[] ={ "Pzt", "Sal", "Car", "Per", "Cum", "Cmt", "Paz"}; //{ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday","Saturday", "Sunday"};
+
 
 	/* Get the RTC current Time */
 	HAL_RTC_GetTime(&hrtc, &sTimeGet, RTC_FORMAT_BIN);
 	/* Display time Format : hh:mm:ss */
-	sprintf(aShowTime, "%2d:%02d:%02d", sTimeGet.Hours, sTimeGet.Minutes,
-			sTimeGet.Seconds);
-	OLED_SetCursor(14, 16);
-	OLED_WriteString(aShowTime, Font_11x18, White);
+	sprintf(aShowTime, "%2d:%02d", sTimeGet.Hours, sTimeGet.Minutes);//sTimeGet.Seconds
+	OLED_SetCursor(20, 20);
+	OLED_WriteString(aShowTime, Font_16x26, White);
+	sprintf(aShowTime, "%02d",sTimeGet.Seconds);
+	OLED_SetCursor(105, 32);
+	OLED_WriteString(aShowTime, Font_7x10, White);
 
 	/* Get the RTC current Date */
 	HAL_RTC_GetDate(&hrtc, &sDateGet, RTC_FORMAT_BIN);
 	/* Display date Format : mm-dd-yy */
 	sprintf(aShowDate, "%02d-%02d-%2d", sDateGet.Date, sDateGet.Month,
 			2000 + sDateGet.Year);
-	OLED_SetCursor(25, 40);
+	OLED_SetCursor(10, 50);
 	OLED_WriteString(aShowDate, Font_7x10, White);
-	OLED_SetCursor(30, 53);
+	OLED_SetCursor(95, 50);
 	OLED_WriteString(weekDay[sDateGet.WeekDay-1], Font_7x10, White);  //
+}
+void takvimGeriYukleme()
+{
+	takvimAry[0]=(BKP->DR4>>8);
+	takvimAry[1]=(BKP->DR4)&0xFF;
+	takvimAry[2]=(BKP->DR5>>8);
+	takvimAry[3]=(BKP->DR5)&0xFF;
+	takvimAyarla();
+}
+
+void alarmGeriYukleme()
+{
+	  SaatAry[0]=(BKP->DR6>>8);
+	  SaatAry[1]=(BKP->DR6)&0xFF;
+	  SaatAry[2]=(BKP->DR7>>8);
+	  alarmAyarla();
 }

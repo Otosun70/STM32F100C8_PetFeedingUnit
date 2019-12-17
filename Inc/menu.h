@@ -27,11 +27,11 @@ void Led5_Off();
 
 
 	typedef struct {
-				char menuAdi[10];
-				char satir1[10];
-				char satir2[10];
-				char satir3[10];
-				char satir4[10];
+				char menuAdi[15];
+				char satir1[15];
+				char satir2[15];
+				char satir3[15];
+				char satir4[15];
 }menulistTypeDef;
 
 	menulistTypeDef anaMenu, menu1Menu,ledlerMenu,ayarlarMenu,acKapaMenu, *menuPtr;

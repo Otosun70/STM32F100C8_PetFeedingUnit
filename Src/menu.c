@@ -3,11 +3,11 @@
 
 
 
-	menulistTypeDef anaMenu		={"ANA MENU"	,"Menu 1"       ,"Ledler"        ,"Ayarlar","Cikis"};
-	menulistTypeDef beslemeMenu	={"MENU_1"		,"Servo"     	,"2. Satir"      ,"3. Satir"};
-	menulistTypeDef kontrollerMenu	={"LEDLER"		,"Led 1"        ,"Led 2"         ,"Led 3"};
-	menulistTypeDef menu3Menu	={"AYARLAR"		,"Saat"         ,"Takvim"        ,"Alarm"};
-	menulistTypeDef acKapaMenu	={"AC/KAPAT"	,"Ac"           ,"Kapat"};
+	menulistTypeDef anaMenu			={"   ANA MENU"		,"Besleme"      ,"Kontroller"    ,"Ayarlar","Cikis"};
+	menulistTypeDef beslemeMenu		={"   BESLEME"		,"Yem Miktari"  ,"Su Miktari"    ,"Hediye Yem"};
+	menulistTypeDef kontrollerMenu	={"   KONTROLLER"	,"Motor 1"      ,"Motor 2"       ,"Servo Kontrol"};
+	menulistTypeDef ayarlarMenu		={"   AYARLAR"		,"Saat"         ,"Takvim"        ,"Alarm"};
+//	menulistTypeDef acKapaMenu		={"   AC/KAPAT"		,"Ac"           ,"Kapat"};
 
 
 void BuildMenu(menuLevelsTypeDef *currentNode, menulistTypeDef *menuNode,OLED_COLOR color1,OLED_COLOR color2,OLED_COLOR color3,OLED_COLOR color4,
@@ -55,37 +55,38 @@ void Down(menuLevelsTypeDef **currentNode)
 
 void Build_Menu()
 {
-	//			secenek		menu					renk					fonksiyon			önceki		sonraki			üst			alt
+	//			secenek		menu					renk					fonksiyon							önceki		sonraki			üst			alt
 	//-----------------------------------------------------------------------------------------------------------------------------------
-	  BuildMenu(&menu1M,	&anaMenu		,Black,	White,	White,	White,		0, 				&exitM,	&ledlerM, 		0, 			&menu11M);
+	  BuildMenu(&menu1M,	&anaMenu			,Black,	White,	White,	White,		0, 							&exitM,		&ledlerM, 		0, 			&menu11M);
 
-	  BuildMenu(&menu11M,	&beslemeMenu		,Black,	White,	White,	White,		KeyServoKontrol,&menu13M,	&menu12M, 		&menu1M, 	0);
-	  BuildMenu(&menu12M,	&beslemeMenu		,White,	Black,	White,	White,		0, 				&menu11M,	&menu13M, 		&menu1M, 	0);
-	  BuildMenu(&menu13M,	&beslemeMenu		,White,	White,	Black,	White,		0,				&menu12M,	&menu11M,		&menu1M, 	0);
+	  BuildMenu(&menu11M,	&beslemeMenu		,Black,	White,	White,	White,		KeyPetFeedSetting,			&menu13M,	&menu12M, 		&menu1M, 	0);
+	  BuildMenu(&menu12M,	&beslemeMenu		,White,	Black,	White,	White,		KeyPetWaterSetting,			&menu11M,	&menu13M, 		&menu1M, 	0);
+	  BuildMenu(&menu13M,	&beslemeMenu		,White,	White,	Black,	White,		KeyRewardPetFeedSetting,	&menu12M,	&menu11M,		&menu1M, 	0);
 
-	  BuildMenu(&ledlerM,	&anaMenu		,White,	Black,	White,	White, 		0, 				&menu1M,	&ayarlarM, 		0, 			&led1M);
+	  BuildMenu(&ledlerM,	&anaMenu			,White,	Black,	White,	White, 		0, 							&menu1M,	&ayarlarM, 		0, 			&led1M);
 
-	  BuildMenu(&led1M,		&kontrollerMenu		,Black,	White,	White,	White,		0,				&led3M,		&led2M, 		&ledlerM, 	&on1M);
-	  BuildMenu(&on1M,		&acKapaMenu		,Black,	White,	Black,	White, 		Led3_On,		&off1M,		&off1M, 		&led1M, 	0);
-	  BuildMenu(&off1M,		&acKapaMenu		,White,	Black,	Black,	White,		Led3_Off, 		&on1M, 		&on1M,			&led1M, 	0);
+	  BuildMenu(&led1M,		&kontrollerMenu		,Black,	White,	White,	White,		KeyMotor1Kontrol,			&led3M,		&led2M, 		&ledlerM, 	0);
+//	  BuildMenu(&on1M,		&acKapaMenu			,Black,	White,	Black,	White, 		Led3_On,					&off1M,		&off1M, 		&led1M, 	0);
+//	  BuildMenu(&off1M,		&acKapaMenu			,White,	Black,	Black,	White,		Led3_Off, 					&on1M, 		&on1M,			&led1M, 	0);
 
-	  BuildMenu(&led2M,		&kontrollerMenu		,White,	Black,	White,	White, 		0,			 	&led1M, 	&led3M, 		&ledlerM , 	&on2M);
-	  BuildMenu(&on2M,		&acKapaMenu		,Black,	White,	Black,	White, 		Led4_On,		&off2M,		&off2M, 		&led2M, 	0);
-	  BuildMenu(&off2M,		&acKapaMenu		,White,	Black,	Black,	White, 		Led4_Off, 		&on2M, 		&on2M,			&led2M, 	0);
+	  BuildMenu(&led2M,		&kontrollerMenu		,White,	Black,	White,	White, 		KeyMotor2Kontrol,			&led1M, 	&led3M, 		&ledlerM , 	0);
+//	  BuildMenu(&on2M,		&acKapaMenu			,Black,	White,	Black,	White, 		Led4_On,					&off2M,		&off2M, 		&led2M, 	0);
+//	  BuildMenu(&off2M,		&acKapaMenu			,White,	Black,	Black,	White, 		Led4_Off, 					&on2M, 		&on2M,			&led2M, 	0);
 
-	  BuildMenu(&led3M,		&kontrollerMenu		,White,	White,	Black,	White, 		0,			 	&led2M, 	&led1M,			&ledlerM, 	&on3M);
-	  BuildMenu(&on3M,		&acKapaMenu		,Black,	White,	Black,	White, 		Led5_On,		&off3M,		&off3M, 		&led3M, 	0);
-	  BuildMenu(&off3M,		&acKapaMenu		,White,	Black,	Black,	White, 		Led5_Off, 		&on3M, 		&on3M,			&led3M, 	0);
+	  BuildMenu(&led3M,		&kontrollerMenu		,White,	White,	Black,	White, 		KeyServoKontrol,			&led2M, 	&led1M,			&ledlerM, 	0);
+//	  BuildMenu(&on3M,		&acKapaMenu		,Black,	White,	Black,	White, 		Led5_On,		&off3M,		&off3M, 		&led3M, 	0);
+//	  BuildMenu(&off3M,		&acKapaMenu		,White,	Black,	Black,	White, 		Led5_Off, 		&on3M, 		&on3M,			&led3M, 	0);
 
-	  BuildMenu(&ayarlarM,	&anaMenu		,White,	White,	Black,	White,		0,				&ledlerM,	&exitM,		0, 			&saatM);
 
-	  BuildMenu(&saatM,		&menu3Menu	,Black,	White,	White,	White,		KeySaatiAyarlama, 	&alarmM,	&takvimM, 		&ayarlarM, 	0);
+	  BuildMenu(&ayarlarM,	&anaMenu			,White,	White,	Black,	White,		0,							&ledlerM,	&exitM,			0, 			&saatM);
 
-	  BuildMenu(&takvimM,	&menu3Menu	,White,	Black,	White,	White,		KeyTakvimiAyarlama,	&saatM, 	&alarmM, 		&ayarlarM, 	0);
+	  BuildMenu(&saatM,		&ayarlarMenu		,Black,	White,	White,	White,		KeySaatiAyarlama, 			&alarmM,	&takvimM, 		&ayarlarM, 	0);
 
-	  BuildMenu(&alarmM,	&menu3Menu	,White,	White,	Black,	White,		KeyAlarmAyarlama, 				&takvimM, 	&saatM,			&ayarlarM , 0);
+	  BuildMenu(&takvimM,	&ayarlarMenu		,White,	Black,	White,	White,		KeyTakvimiAyarlama,			&saatM, 	&alarmM, 		&ayarlarM, 	0);
 
-	  BuildMenu(&exitM,		&anaMenu		,White,	White,	White,	Black,		menuExit, 		&ayarlarM,	&menu1M, 		0, 			0);
+	  BuildMenu(&alarmM,	&ayarlarMenu		,White,	White,	Black,	White,		KeyAlarmAyarlama, 			&takvimM, 	&saatM,			&ayarlarM , 0);
+
+	  BuildMenu(&exitM,		&anaMenu			,White,	White,	White,	Black,		menuExit, 					&ayarlarM,	&menu1M, 		0, 			0);
 
 
 
@@ -131,22 +132,22 @@ void ekranMenu(uint8_t y1)
 {
 
 	char ekranYer[16];
-	OLED_Fill(Black);
+	OLED1_Fill(Black);
 
 	strcpy(ekranYer, currentM->menuPtr->menuAdi);
-	OLED_SetCursor(30, y1);
+	OLED_GotoXY(0, y1);
 	OLED_WriteString(ekranYer, Font_7x10, White);
 	strcpy(ekranYer, currentM->menuPtr->satir1);
-	OLED_SetCursor(0, y1+15);
+	OLED_GotoXY(0, y1+15);
 	OLED_WriteString(ekranYer, Font_7x10, currentM->color1);
 	strcpy(ekranYer, currentM->menuPtr->satir2);
-	OLED_SetCursor(0, y1+25);
+	OLED_GotoXY(0, y1+25);
 	OLED_WriteString(ekranYer, Font_7x10, currentM->color2);
 	strcpy(ekranYer, currentM->menuPtr->satir3);
-	OLED_SetCursor(0, y1+35);
+	OLED_GotoXY(0, y1+35);
 	OLED_WriteString(ekranYer, Font_7x10, currentM->color3);
 	strcpy(ekranYer, currentM->menuPtr->satir4);
-	OLED_SetCursor(0, y1+45);
+	OLED_GotoXY(0, y1+45);
 	OLED_WriteString(ekranYer, Font_7x10, currentM->color4);
 }
 

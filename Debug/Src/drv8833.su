@@ -1,0 +1,13 @@
+drv8833.c:10:6:motor1_forth	8	static
+drv8833.c:16:6:motor1_back	8	static
+drv8833.c:22:6:motor2_forth	8	static
+drv8833.c:28:6:motor2_back	8	static
+drv8833.c:34:6:motor1_stop	8	static
+drv8833.c:40:6:motor2_stop	8	static
+drv8833.c:46:6:motorDriverWakeUp	8	static
+drv8833.c:51:6:motorDriverSleep	8	static
+drv8833.c:56:6:faultRead	8	static
+drv8833.c:61:6:motor1Kontrol	8	static
+drv8833.c:92:6:KeyMotor1Kontrol	4	static
+drv8833.c:98:6:motor2Kontrol	8	static
+drv8833.c:129:6:KeyMotor2Kontrol	4	static

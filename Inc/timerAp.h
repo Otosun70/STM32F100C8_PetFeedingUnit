@@ -18,8 +18,8 @@
 //#define RCC_APB1ENR_TIM7EN 0x00000020
 extern bool durumFlash;
 
-void InitTimer14(void);
-void TIM14_IRQHandler (void);
+void InitTimer7(void);
+void TIM7_IRQHandler (void);
 
 
 

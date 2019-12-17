@@ -1,0 +1,3 @@
+petFeeding.c:11:6:giveFeed	8	static
+petFeeding.c:33:6:fault_Durum	8	static
+petFeeding.c:48:6:sleepMode	8	static

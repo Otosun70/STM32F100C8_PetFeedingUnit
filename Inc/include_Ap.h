@@ -8,7 +8,7 @@
 #ifndef INCLUDE_AP_H_
 #define INCLUDE_AP_H_
 
-#include <OLED.h>
+#include "OLED.h"
 #include "fonts.h"
 #include "menu.h"
 #include "buttonPed.h"
@@ -17,5 +17,9 @@
 #include "ADC_Ap.h"
 #include "main.h"
 #include "ServoKontrol.h"
+#include "displaySelection.h"
+#include "petFeed_Setting.h"
+#include "drv8833.h"
+#include "petFeeding.h"
 
 #endif /* INCLUDE_AP_H_ */

@@ -62,8 +62,23 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define NSLEEP_Pin GPIO_PIN_5
 #define NSLEEP_GPIO_Port GPIOA
+#define MOTOR1_1_Pin GPIO_PIN_6
+#define MOTOR1_1_GPIO_Port GPIOA
+#define MOTOR1_2_Pin GPIO_PIN_7
+#define MOTOR1_2_GPIO_Port GPIOA
+#define MOTOR2_2_Pin GPIO_PIN_0
+#define MOTOR2_2_GPIO_Port GPIOB
+#define MOTOR2_1_Pin GPIO_PIN_1
+#define MOTOR2_1_GPIO_Port GPIOB
 #define NFAULT_Pin GPIO_PIN_2
 #define NFAULT_GPIO_Port GPIOB
+#define LED_ALARM_Pin GPIO_PIN_10
+#define LED_ALARM_GPIO_Port GPIOB
+#define SERVO_2_Pin GPIO_PIN_14
+#define SERVO_2_GPIO_Port GPIOB
+#define AKIS_SENS_Pin GPIO_PIN_15
+#define AKIS_SENS_GPIO_Port GPIOB
+#define AKIS_SENS_EXTI_IRQn EXTI15_10_IRQn
 #define SERVO_POWER_Pin GPIO_PIN_15
 #define SERVO_POWER_GPIO_Port GPIOA
 #define KEY_1_Pin GPIO_PIN_3

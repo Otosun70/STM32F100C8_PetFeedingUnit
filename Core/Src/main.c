@@ -49,7 +49,6 @@ I2C_HandleTypeDef hi2c1;
 
 RTC_HandleTypeDef hrtc;
 
-TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim15;
 
 /* USER CODE BEGIN PV */
@@ -63,7 +62,6 @@ static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_RTC_Init(void);
-static void MX_TIM3_Init(void);
 static void MX_TIM15_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -71,9 +69,9 @@ static void MX_TIM15_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint16_t deger[4];
+uint16_t deger[5];
 uint16_t servoDeger;
-
+uint16_t suSayaci;
 /* USER CODE END 0 */
 
 /**
@@ -109,17 +107,20 @@ int main(void)
   MX_ADC1_Init();
   MX_I2C1_Init();
   MX_RTC_Init();
-  MX_TIM3_Init();
   MX_TIM15_Init();
   /* USER CODE BEGIN 2 */
   OLED_Init();
- // Build_Menu();
+  InitTimer7();
+  Build_Menu();
+  takvimGeriYukleme();
+  alarmGeriYukleme();
   displaySelectKey=GIRIS_EKRANI;
   kayitOnayDurum=false;
 
-  HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1);
 
-  char keyYer[4];
+  char keyYer[8];
+  sleepDurum=true;
 
   /* USER CODE END 2 */
 
@@ -130,11 +131,18 @@ int main(void)
 	  displaySelect();
 	  pilGoster();
 	  OLED_SetCursor(0, 0);
-	  sprintf(keyYer, "%3d", deger[1]);
+	  sprintf(keyYer, "%4d", deger[0]);
+	  OLED_WriteString(keyYer, Font_7x10, White);
+	  OLED_SetCursor(0, 10);
+	  sprintf(keyYer, "%3d", suSayaci);
 	  OLED_WriteString(keyYer, Font_7x10, White);
 	  OLED_UpdateScreen();
 	  ADC_DMA_degerOkuma();
 	  alarmDeneme(T1DEGER);
+//	  giveFeed();
+	  fault_Durum();
+	  sleepMode();
+
 
     /* USER CODE END WHILE */
 
@@ -156,12 +164,12 @@ void SystemClock_Config(void)
   /** Initializes the CPU, AHB and APB busses clocks 
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
-  RCC_OscInitStruct.LSEState = RCC_LSE_BYPASS;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL3;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -208,12 +216,12 @@ static void MX_ADC1_Init(void)
   /** Common config 
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 5;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -223,6 +231,34 @@ static void MX_ADC1_Init(void)
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Rank = ADC_REGULAR_RANK_4;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Rank = ADC_REGULAR_RANK_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -279,9 +315,6 @@ static void MX_RTC_Init(void)
 
   /* USER CODE END RTC_Init 0 */
 
-  RTC_TimeTypeDef sTime = {0};
-  RTC_DateTypeDef DateToUpdate = {0};
-
   /* USER CODE BEGIN RTC_Init 1 */
 
   /* USER CODE END RTC_Init 1 */
@@ -294,94 +327,9 @@ static void MX_RTC_Init(void)
   {
     Error_Handler();
   }
-
-  /* USER CODE BEGIN Check_RTC_BKUP */
-    
-  /* USER CODE END Check_RTC_BKUP */
-
-  /** Initialize RTC and set the Time and Date 
-  */
-  sTime.Hours = 0x0;
-  sTime.Minutes = 0x0;
-  sTime.Seconds = 0x0;
-
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  DateToUpdate.WeekDay = RTC_WEEKDAY_MONDAY;
-  DateToUpdate.Month = RTC_MONTH_JANUARY;
-  DateToUpdate.Date = 0x1;
-  DateToUpdate.Year = 0x0;
-
-  if (HAL_RTC_SetDate(&hrtc, &DateToUpdate, RTC_FORMAT_BCD) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN RTC_Init 2 */
 
   /* USER CODE END RTC_Init 2 */
-
-}
-
-/**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM3_Init(void)
-{
-
-  /* USER CODE BEGIN TIM3_Init 0 */
-
-  /* USER CODE END TIM3_Init 0 */
-
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-
-  /* USER CODE BEGIN TIM3_Init 1 */
-
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 0;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM3_Init 2 */
-
-  /* USER CODE END TIM3_Init 2 */
-  HAL_TIM_MspPostInit(&htim3);
 
 }
 
@@ -406,9 +354,9 @@ static void MX_TIM15_Init(void)
 
   /* USER CODE END TIM15_Init 1 */
   htim15.Instance = TIM15;
-  htim15.Init.Prescaler = 0;
+  htim15.Init.Prescaler = 85;
   htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim15.Init.Period = 0;
+  htim15.Init.Period = 935;
   htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim15.Init.RepetitionCounter = 0;
   htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -439,10 +387,6 @@ static void MX_TIM15_Init(void)
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
   if (HAL_TIM_PWM_ConfigChannel(&htim15, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim15, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -496,18 +440,24 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, NSLEEP_Pin|SERVO_POWER_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, NSLEEP_Pin|MOTOR1_1_Pin|MOTOR1_2_Pin|SERVO_POWER_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, KEY_1_Pin|KEY_2_Pin|KEY_3_Pin|KEY_4_Pin 
-                          |KEY_5_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, MOTOR2_2_Pin|MOTOR2_1_Pin|LED_ALARM_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : NSLEEP_Pin SERVO_POWER_Pin */
-  GPIO_InitStruct.Pin = NSLEEP_Pin|SERVO_POWER_Pin;
+  /*Configure GPIO pins : NSLEEP_Pin MOTOR1_1_Pin MOTOR1_2_Pin SERVO_POWER_Pin */
+  GPIO_InitStruct.Pin = NSLEEP_Pin|MOTOR1_1_Pin|MOTOR1_2_Pin|SERVO_POWER_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : MOTOR2_2_Pin MOTOR2_1_Pin LED_ALARM_Pin */
+  GPIO_InitStruct.Pin = MOTOR2_2_Pin|MOTOR2_1_Pin|LED_ALARM_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : NFAULT_Pin */
   GPIO_InitStruct.Pin = NFAULT_Pin;
@@ -515,14 +465,23 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(NFAULT_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : AKIS_SENS_Pin */
+  GPIO_InitStruct.Pin = AKIS_SENS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(AKIS_SENS_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : KEY_1_Pin KEY_2_Pin KEY_3_Pin KEY_4_Pin 
                            KEY_5_Pin */
   GPIO_InitStruct.Pin = KEY_1_Pin|KEY_2_Pin|KEY_3_Pin|KEY_4_Pin 
                           |KEY_5_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

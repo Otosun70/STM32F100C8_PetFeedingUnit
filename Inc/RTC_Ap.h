@@ -58,5 +58,8 @@ void alarmGoster();
 
 void alarmDeneme(uint8_t alarmDurdurmaKeyDegeri);
 
+void takvimGeriYukleme();
+
+void alarmGeriYukleme();
 
 #endif /* RTC_AP_H_ */

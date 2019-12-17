@@ -3,7 +3,7 @@
 void servoKontrol()
 {
 	extern uint16_t servoDeger;
-	extern TIM_HandleTypeDef htim3;
+	extern TIM_HandleTypeDef htim15;
 		switch(Key)
 		{
 		case T1DEGER:
@@ -25,16 +25,24 @@ void servoKontrol()
 
 			break;
 		case T4DEGER:
+			/*
 			servoDeger=469;
 			OLED_SetCursor(0, 20);
 			OLED_WriteString("SERVO ACISI :270",  Font_7x10, White);
-
+*/
+			currentM = &ledlerM;
+			displaySelectKey=MENU_SISTEMI;
 			break;
 
 		}
 
-		__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,servoDeger);
+		__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_1,servoDeger);
 
 }
 
+void KeyServoKontrol()
+{
+	displaySelectKey=SERVO_KONTROL;
+	displayClean=true;
+}
 

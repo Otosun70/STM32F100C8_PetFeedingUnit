@@ -1,5 +1,5 @@
 
-#include <OLED.h>
+#include "include_Ap.h"
 #include "string.h"
 
 #define ABS(x)   ((x) > 0 ? (x) : -(x))
@@ -7,14 +7,56 @@
 static SSD1306_t OLED;
 
 static uint8_t OLED_Buffer[OLED_WIDTH * OLED_HEIGHT / 8];
+
+
+
 //
 //  Send a byte to the command register
 //
-static void OLED_WriteCommand(uint8_t command)
+void OLED_WriteCommand(uint8_t command)
 {
 	HAL_I2C_Mem_Write(&hi2c1,OLED_I2C_ADDR,0x00,1,&command,1,10);
 }
 
+//
+//  Write the screenbuffer with changed to the screen
+//
+void OLED_UpdateScreen(void)
+{
+//	extern DMA_HandleTypeDef hdma_i2c1_tx;
+	uint8_t i;
+	uint8_t buffComd[3];
+	uint8_t *buffComdPtr;
+	buffComd[1]=0x00;
+	buffComd[2]=0x10;
+
+	buffComdPtr=&buffComd[0];
+
+	for (i = 0; i < 8; i++) {
+
+		buffComd[0]=(0xB0+i);
+
+		HAL_I2C_Mem_Write(&hi2c1,OLED_I2C_ADDR,0x00,1,buffComdPtr,3,20);
+//		HAL_I2C_Master_Transmit(&hi2c1,OLED_I2C_ADDR, buffComdPtr,4,50);
+
+//		HAL_I2C_Master_Transmit_DMA(&hdma_i2c1_tx, OLED_I2C_ADDR, buffComd,4);
+//		HAL_I2C_MasterTxCpltCallback(&hdma_i2c1_tx);
+//		HAL_I2C_Mem_Write_DMA(&hdma_i2c1_tx, OLED_I2C_ADDR, 0x00,1, buffComd, 3);
+
+
+
+//		HAL_I2C_Master_Transmit_DMA(&hdma_i2c1_tx, OLED_I2C_ADDR, &buffComd_ptr,4);
+
+
+
+		HAL_I2C_Mem_Write(&hi2c1,OLED_I2C_ADDR,0x40,1,&OLED_Buffer[OLED_WIDTH*i],OLED_WIDTH,20);
+//		HAL_I2C_Mem_Write_DMA(&hdma_i2c1_tx,OLED_I2C_ADDR,0x40,1,&OLED_Buffer[OLED_WIDTH * i],OLED_WIDTH);
+
+//		HAL_StatusTypeDef HAL_I2C_Mem_Write(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
+//		HAL_StatusTypeDef HAL_I2C_Mem_Write_DMA(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size)
+
+	}
+}
 
 //
 //	Initialize the oled screen
@@ -22,40 +64,41 @@ static void OLED_WriteCommand(uint8_t command)
 uint8_t OLED_Init(void)
 {	
 	// Wait for the screen to boot
-//	HAL_Delay(100);
+	HAL_Delay(100);
 	
 	/* Init LCD */
-	OLED_WriteCommand(OLED_Display_Off); //display off
-	OLED_WriteCommand(OLED_Memory_Addressing_Set); //Set Memory Addressing Mode
-	OLED_WriteCommand(OLED_Page_Addressing_Column_Higher_Set); //00,Horizontal Addressing Mode;01,Vertical Addressing Mode;10,Page Addressing Mode (RESET);11,Invalid
-	OLED_WriteCommand(OLED_Page_Addressing_Page_Start_Set); //Set Page Start Address for Page Addressing Mode,0-7
-	OLED_WriteCommand(OLED_Com_Output_Scan_Inc); //Set COM Output Scan Direction
-	OLED_WriteCommand(OLED_Page_Addressing_Column_Lower_Set); //---set low column address
-	OLED_WriteCommand(OLED_Page_Addressing_Column_Higher_Set); //---set high column address
-	OLED_WriteCommand(OLED_Display_Start_Line_Set); //--set start line address
-	OLED_WriteCommand(OLED_Constrast_Set); //--set contrast control register
-	OLED_WriteCommand(0xFF);//Contrast degeri
-	OLED_WriteCommand(0xA0); //--set segment re-map 0 to 127
-	OLED_WriteCommand(OLED_Display_Normal); //--set normal display
-	OLED_WriteCommand(OLED_Multiplex_Radio_Set); //--set multiplex ratio(1 to 64)
+	OLED_WriteCommand(0xAE); //display off
+	OLED_WriteCommand(0x20); //Set Memory Addressing Mode   
+	OLED_WriteCommand(0x10); //00,Horizontal Addressing Mode;01,Vertical Addressing Mode;10,Page Addressing Mode (RESET);11,Invalid
+	OLED_WriteCommand(0xB0); //Set Page Start Address for Page Addressing Mode,0-7
+	OLED_WriteCommand(0xC8); //Set COM Output Scan Direction
+	OLED_WriteCommand(0x00); //---set low column address
+	OLED_WriteCommand(0x10); //---set high column address
+	OLED_WriteCommand(0x40); //--set start line address
+	OLED_WriteCommand(0x81); //--set contrast control register
+	OLED_WriteCommand(0xFF);
+	OLED_WriteCommand(0xA1); //--set segment re-map 0 to 127
+	OLED_WriteCommand(0xA6); //--set normal display
+	OLED_WriteCommand(0xA8); //--set multiplex ratio(1 to 64)
 	OLED_WriteCommand(0x3F); //
 	OLED_WriteCommand(0xA4); //0xa4,Output follows RAM content;0xa5,Output ignores RAM content
-	OLED_WriteCommand(OLED_Display_Offset_Set); //-set display offset
+	OLED_WriteCommand(0xD3); //-set display offset
 	OLED_WriteCommand(0x00); //-not offset
-	OLED_WriteCommand(OLED_Display_Oscillator_Frequency_Set); //--set display clock divide ratio/oscillator frequency
+	OLED_WriteCommand(0xD5); //--set display clock divide ratio/oscillator frequency
 	OLED_WriteCommand(0xF0); //--set divide ratio
-	OLED_WriteCommand(OLED_Precharge_Period_Set); //--set pre-charge period
+	OLED_WriteCommand(0xD9); //--set pre-charge period
 	OLED_WriteCommand(0x22); //
-	OLED_WriteCommand(OLED_Com_Pins_Set); //--set com pins hardware configuration
+	OLED_WriteCommand(0xDA); //--set com pins hardware configuration
 	OLED_WriteCommand(0x12);
-	OLED_WriteCommand(OLED_VCOMH_Deselect_Level_Set); //--set vcomh
+	OLED_WriteCommand(0xDB); //--set vcomh
 	OLED_WriteCommand(0x20); //0x20,0.77xVcc
-	OLED_WriteCommand(OLED_Charge_Pump_Set); //--set DC-DC enable
+	OLED_WriteCommand(0x8D); //--set DC-DC enable
 	OLED_WriteCommand(0x14); //
-	OLED_WriteCommand(OLED_Display_On); //--turn on SSD1306 panel
+	OLED_WriteCommand(0xAF); //--turn on SSD1306 panel
 	
+	displayDurum=true;
 	// Clear screen
-	OLED_Fill(Black);
+	OLED1_Fill(Black);
 	
 	// Flush buffer to screen
 	OLED_UpdateScreen();
@@ -77,6 +120,19 @@ void OLED_Fill(OLED_COLOR color) {
 	memset(OLED_Buffer, (color == Black) ? 0x00 : 0xFF, sizeof(OLED_Buffer));
 }
 
+void OLED1_Fill(OLED_COLOR color)
+{
+	/* Set memory */
+	uint32_t i;
+
+	for(i = 0; i < sizeof(OLED_Buffer); i++)
+	{
+		OLED_Buffer[i] = (color == Black) ? 0x00 : 0xFF;
+	}
+}
+
+
+
 void OLED_ToggleInvert(void) {
 	uint16_t i;
 
@@ -89,6 +145,11 @@ void OLED_ToggleInvert(void) {
 	}
 }
 
+void OLED_GotoXY(uint16_t x, uint16_t y) {
+	/* Set write pointers */
+	OLED.CurrentX = x;
+	OLED.CurrentY = y;
+}
 
 void OLED_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, OLED_COLOR c) {
 	int16_t dx, dy, sx, sy, err, e2, i, tmp;
@@ -358,21 +419,6 @@ void OLED_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, OLED_COLOR c) {
 
 
 
-//
-//  Write the screenbuffer with changed to the screen
-//
-void OLED_UpdateScreen(void) 
-{
-	uint8_t i;
-	
-	for (i = 0; i < 8; i++) {
-		OLED_WriteCommand(0xB0 + i);
-		OLED_WriteCommand(0x00);
-		OLED_WriteCommand(0x10);
-
-		HAL_I2C_Mem_Write(&hi2c1,OLED_I2C_ADDR,0x40,1,&OLED_Buffer[OLED_WIDTH * i],OLED_WIDTH,100);
-	}
-}
 
 //
 //	Draw one pixel in the screenbuffer
@@ -404,6 +450,31 @@ void OLED_DrawPixel(uint8_t x, uint8_t y, OLED_COLOR color) {
 }
 
 
+void OLED1_DrawPixel(uint8_t x, uint8_t y, OLED_COLOR color)
+{
+	if (x >= OLED_WIDTH || y >= OLED_HEIGHT) 
+	{
+		// Don't write outside the buffer
+		return;
+	}
+	
+	// Check if pixel should be inverted
+	if (OLED.Inverted) 
+	{
+		color = (OLED_COLOR)!color;
+	}
+	
+	// Draw in the right color
+	if (color == White)
+	{
+		OLED_Buffer[x + (y / 8) * OLED_WIDTH] |= 1 << (y % 8);
+	} 
+	else 
+	{
+		OLED_Buffer[x + (y / 8) * OLED_WIDTH] &= ~(1 << (y % 8));
+	}
+}
+
 //
 //  Draw 1 char to the screen buffer
 //	ch 		=> char om weg te schrijven
@@ -430,11 +501,11 @@ char OLED_WriteChar(char ch, FontDef Font, OLED_COLOR color)
 		{
 			if ((b << j) & 0x8000) 
 			{
-				OLED_DrawPixel(OLED.CurrentX + j, (OLED.CurrentY + i), (OLED_COLOR) color);
+				OLED1_DrawPixel(OLED.CurrentX + j, (OLED.CurrentY + i), (OLED_COLOR) color);
 			} 
 			else 
 			{
-				OLED_DrawPixel(OLED.CurrentX + j, (OLED.CurrentY + i), (OLED_COLOR)!color);
+				OLED1_DrawPixel(OLED.CurrentX + j, (OLED.CurrentY + i), (OLED_COLOR)!color);
 			}
 		}
 	}
@@ -471,10 +542,47 @@ char OLED_WriteString(char* str, FontDef Font, OLED_COLOR color)
 //
 //	Position the cursor
 //
-
 void OLED_SetCursor(uint8_t x, uint8_t y) 
 {
 	OLED.CurrentX = x;
 	OLED.CurrentY = y;
 }
+
+void OLED1_DrawCircle(const uint8_t CenterX, const uint8_t CenterY, const uint8_t Radius, OLED_COLOR color)
+{
+	if (((CenterX + Radius) < OLED_WIDTH) &&
+	((CenterY + Radius) < OLED_HEIGHT))
+	{
+		uint8_t x, y;
+		int16_t xChange, radiusError;
+		uint16_t yChange;
+		x = Radius;
+		y = 0;
+		xChange = 1 - 2 * Radius;
+		yChange = 1;
+		radiusError = 0;
+
+		while (x >= y)
+		{
+			OLED1_DrawPixel(CenterX+x, CenterY+y, (OLED_COLOR) color);
+			OLED1_DrawPixel(CenterX-x, CenterY+y, (OLED_COLOR) color);
+			OLED1_DrawPixel(CenterX-x, CenterY-y, (OLED_COLOR) color);
+			OLED1_DrawPixel(CenterX+x, CenterY-y, (OLED_COLOR) color);
+			OLED1_DrawPixel(CenterX+y, CenterY+x, (OLED_COLOR) color);
+			OLED1_DrawPixel(CenterX-y, CenterY+x, (OLED_COLOR) color);
+			OLED1_DrawPixel(CenterX-y, CenterY-x, (OLED_COLOR) color);
+			OLED1_DrawPixel(CenterX+y, CenterY-x, (OLED_COLOR) color);
+			y++;
+			radiusError += yChange;
+			yChange += 2;
+			if ((2 * radiusError + xChange) > 0)
+			{
+				x--;
+				radiusError += xChange;
+				xChange += 2;
+			}
+		}
+	}
+}
+
 

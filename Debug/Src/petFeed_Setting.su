@@ -1,0 +1,7 @@
+petFeed_Setting.c:10:6:amountSetting	4	static
+petFeed_Setting.c:50:6:petFeedSetting	32	static
+petFeed_Setting.c:66:6:KeyPetFeedSetting	4	static
+petFeed_Setting.c:74:6:petRewardFeedSetting	32	static
+petFeed_Setting.c:90:6:KeyRewardPetFeedSetting	4	static
+petFeed_Setting.c:98:6:petWaterSetting	32	static
+petFeed_Setting.c:114:6:KeyPetWaterSetting	4	static
